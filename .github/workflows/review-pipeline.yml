@@ -2,11 +2,12 @@
 name: Review Intelligence Pipeline
 
 on:
-  workflow_dispatch:
-
+  # Jalankan otomatis setiap hari pukul 07.00 WIT (Papua)
   schedule:
-    # Every day at 07:00 in Jayapura (WIT, UTC+9)
-    - cron: "0 22 * * *"
+    - cron: "0 23 * * *"
+
+  # Tetap bisa dijalankan manual dari GitHub Actions
+  workflow_dispatch:
 
 permissions:
   contents: read
