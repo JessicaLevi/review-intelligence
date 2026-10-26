@@ -1,6 +1,3 @@
-
-cat > scripts/analyze_sentiment.py <<'PY'
-import html
 import os
 import re
 import unicodedata
@@ -228,4 +225,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-PY
