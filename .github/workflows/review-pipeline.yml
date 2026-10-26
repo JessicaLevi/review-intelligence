@@ -25,6 +25,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -44,3 +45,9 @@ jobs:
 
       - name: Upload reviews to Supabase
         run: python scripts/upload_to_supabase.py
+
+      - name: Analyze review sentiment
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: python scripts/analyze_sentiment.py
