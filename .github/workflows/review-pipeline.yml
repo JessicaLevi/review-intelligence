@@ -1,0 +1,46 @@
+
+name: Review Intelligence Pipeline
+
+on:
+  workflow_dispatch:
+
+  schedule:
+    # Every day at 07:00 in Jayapura (WIT, UTC+9)
+    - cron: "0 22 * * *"
+
+permissions:
+  contents: read
+
+jobs:
+  review-pipeline:
+    runs-on: ubuntu-latest
+
+    env:
+      APIFY_API_TOKEN: ${{ secrets.APIFY_API_TOKEN }}
+      APIFY_DATASET_ID: ${{ secrets.APIFY_DATASET_ID }}
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Fetch reviews from Apify
+        run: python scripts/fetch_reviews.py
+
+      - name: Clean reviews
+        run: python scripts/clean_reviews.py
+
+      - name: Upload reviews to Supabase
+        run: python scripts/upload_to_supabase.py
