@@ -1,4 +1,4 @@
-"import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 
 export default function Dashboard() {
@@ -71,4 +71,4 @@ export default function Dashboard() {
       </div>
     </main>
   );
-}"
+}
