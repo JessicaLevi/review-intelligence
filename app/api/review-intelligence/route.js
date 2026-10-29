@@ -1,28 +1,23 @@
-import { createClient } from "@supabase/supabase-js";
-import { NextResponse } from "next/server";
+import { NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
 
-export const dynamic = "force-dynamic";
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 export async function GET() {
+  if (!supabaseUrl || !supabaseAnonKey) {
+    return NextResponse.json(
+      { error: "Supabase environment variables are missing." },
+      { status: 500 }
+    );
+  }
+
+  const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
   try {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-    if (!supabaseUrl || !supabaseKey) {
-      return NextResponse.json(
-        { error: "Supabase environment variables are missing." },
-        { status: 500 }
-      );
-    }
-
-    const supabase = createClient(supabaseUrl, supabaseKey);
-
-    // Menarik data dari view/tabel sesuai panduan
     const { data, error } = await supabase
       .from("review_intelligence_public")
-      .select(
-        "review_id, restaurant_name, review_text, stars, published_at, review_url, sentiment_label, sentiment_score, analyzed_at"
-      )
+      .select("review_id, restaurant_name, review_text, stars, published_at, review_url, sentiment_label, sentiment_score, analyzed_at")
       .order("published_at", { ascending: false })
       .limit(500);
 
@@ -36,7 +31,7 @@ export async function GET() {
 
     const reviews = data ?? [];
     const sentimentCounts = { positive: 0, neutral: 0, negative: 0 };
-    let ratingSum = 0;
+    let ratingsSum = 0;
     let ratingCount = 0;
 
     for (const review of reviews) {
@@ -45,21 +40,23 @@ export async function GET() {
 
       const rating = Number(review.stars);
       if (Number.isFinite(rating)) {
-        ratingSum += rating;
+        ratingsSum += rating;
         ratingCount += 1;
       }
     }
 
+    const averageRating = ratingCount > 0 ? ratingsSum / ratingCount : 0;
+
     return NextResponse.json({
       totalReviews: reviews.length,
-      averageRating: ratingCount ? ratingSum / ratingCount : null,
+      averageRating,
       sentimentCounts,
       reviews,
     });
-  } catch (error) {
-    console.error("Review Intelligence API error:", error);
+  } catch (err) {
+    console.error("API error:", err);
     return NextResponse.json(
-      { error: "Unexpected server error." },
+      { error: "Internal server error." },
       { status: 500 }
     );
   }
